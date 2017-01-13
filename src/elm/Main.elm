@@ -1,62 +1,78 @@
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing ( onClick )
+import Http
+import Json.Decode exposing (..)
 
--- component import example
-import Components.Hello exposing ( hello )
+type alias ProgrammingLanguage = {
+  name : String,
+  year : String,
+  quarter: String,
+  count : String
+}
 
+type alias Model =
+  {
+    languageList : List ProgrammingLanguage
+  }
 
--- APP
-main : Program Never Int Msg
-main =
-  Html.beginnerProgram { model = model, view = view, update = update }
+type Msg =
+  MorePlease | NewLang (Result Http.Error (List ProgrammingLanguage))
 
+main : Program Never Model Msg
+main = Html.program
+    {
+      init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }
 
--- MODEL
-type alias Model = Int
+emptyList : List ProgrammingLanguage
+emptyList = [ { name = "", year = "", quarter = "", count = "" } ]
 
-model : number
-model = 0
+init : (Model, Cmd Msg)
+init = (Model emptyList, getProgrammingLanguages)
 
-
--- UPDATE
-type Msg = NoOp | Increment
-
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NoOp -> model
-    Increment -> model + 1
+    MorePlease ->
+      (model, getProgrammingLanguages)
+    NewLang (Ok newUrl) ->
+      (Model newUrl, Cmd.none)
+    NewLang (Err _) ->
+      (model, Cmd.none)
 
+toHtmlList : List ProgrammingLanguage -> Html msg
+toHtmlList strings =
+  ul [] (List.map toLi strings)
 
--- VIEW
--- Html is defined as: elem [ attribs ][ children ]
--- CSS can be applied via class names or inline style attrib
+toLi : ProgrammingLanguage -> Html msg
+toLi lang =
+  li [] [ text (
+  lang.name ++ " " ++
+  lang.year ++ " " ++
+  lang.quarter ++ " " ++
+  lang.count )]
+
 view : Model -> Html Msg
 view model =
-  div [ class "container", style [("margin-top", "30px"), ( "text-align", "center" )] ][    -- inline CSS (literal)
-    div [ class "row" ][
-      div [ class "col-xs-12" ][
-        div [ class "jumbotron" ][
-          img [ src "static/img/elm.jpg", style styles.img ] []                             -- inline CSS (via var)
-          , hello model                                                                     -- ext 'hello' component (takes 'model' as arg)
-          , p [] [ text ( "Elm Webpack Starter" ) ]
-          , button [ class "btn btn-primary btn-lg", onClick Increment ] [                  -- click handler
-            span[ class "glyphicon glyphicon-star" ][]                                      -- glyphicon
-            , span[][ text "FTW!" ]
-          ]
-        ]
-      ]
-    ]
-  ]
+  toHtmlList model.languageList
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
--- CSS STYLES
-styles : { img : List ( String, String ) }
-styles =
-  {
-    img =
-      [ ( "width", "33%" )
-      , ( "border", "4px solid #337AB7")
-      ]
-  }
+getProgrammingLanguages : Cmd Msg
+getProgrammingLanguages =
+  let url = "http://localhost:23322/test123.json"
+  in Http.send NewLang (Http.get url langListDecoder)
+
+langDecoder: Decoder ProgrammingLanguage
+langDecoder = map4 ProgrammingLanguage
+    (field "name" string)
+    (field "year" string)
+    (field "quarter" string)
+    (field "count" string)
+
+langListDecoder : Decoder (List ProgrammingLanguage)
+langListDecoder = Json.Decode.list langDecoder
