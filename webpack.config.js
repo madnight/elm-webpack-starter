@@ -33,6 +33,10 @@ var commonConfig = {
       {
         test: /\.(eot|ttf|woff|woff2|svg)$/,
         loader: 'file-loader'
+      },
+      {
+        test: /\.json$/,
+        loader: 'file-loader?name=[name].[ext]'
       }
     ]
   },
