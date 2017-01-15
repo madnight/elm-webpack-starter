@@ -1,12 +1,13 @@
 import Html exposing (..)
 import Http
 import Json.Decode exposing (..)
+import Json.Decode.Extra exposing (..)
 
 type alias ProgrammingLanguage = {
   name : String,
-  year : String,
-  quarter: String,
-  count : String
+  year : Int,
+  quarter: Int,
+  count : Int
 }
 
 type alias Model = { languageList : List ProgrammingLanguage }
@@ -22,11 +23,8 @@ main = Html.program
     , subscriptions = subscriptions
     }
 
-emptyList : List ProgrammingLanguage
-emptyList = [ { name = "", year = "", quarter = "", count = "" } ]
-
 init : (Model, Cmd Msg)
-init = (Model emptyList, getProgrammingLanguages)
+init = (Model [], getProgrammingLanguages)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -37,14 +35,27 @@ update msg model =
       (model, Cmd.none)
 
 toHtmlList : List ProgrammingLanguage -> Html msg
-toHtmlList strings = ul [] (List.map toLi strings)
+toHtmlList strings = ul [] (List.map toLi (sort strings))
+
+sort xs =
+  xs
+    |> filterYear 2015
+    |> List.sortBy .count
+    |> List.reverse
+
+filterYear : Int -> List ProgrammingLanguage -> List ProgrammingLanguage
+filterYear s = List.filterMap (\p -> isYear p s)
+
+isYear : ProgrammingLanguage -> Int -> Maybe ProgrammingLanguage
+isYear x y = if x.year == y then Just x else Nothing
 
 toLi : ProgrammingLanguage -> Html msg
 toLi lang = li [] [ text (
   lang.name ++ " " ++
-  lang.year ++ " " ++
-  lang.quarter ++ " " ++
-  lang.count )]
+  toString lang.year ++ " " ++
+  toString lang.quarter ++ " " ++
+  toString lang.count
+  )]
 
 view : Model -> Html Msg
 view model = toHtmlList model.languageList
@@ -57,12 +68,17 @@ getProgrammingLanguages =
   let url = "gh-star-event.json"
   in Http.send NewLang (Http.get url langListDecoder)
 
-langDecoder: Decoder ProgrammingLanguage
-langDecoder = map4 ProgrammingLanguage
+stringAsInt : Decoder Int
+stringAsInt = string |> andThen (String.toInt >> fromResult)
+
+langDecoder : Decoder ProgrammingLanguage
+langDecoder =
+  map4 ProgrammingLanguage
     (field "name" string)
-    (field "year" string)
-    (field "quarter" string)
-    (field "count" string)
+    (field "year" stringAsInt)
+    (field "quarter" stringAsInt)
+    (field "count" stringAsInt)
+    -- string |> andThen (String.toInt >> fromResult))
 
 langListDecoder : Decoder (List ProgrammingLanguage)
 langListDecoder = Json.Decode.list langDecoder
