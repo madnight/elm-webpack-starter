@@ -1,4 +1,5 @@
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Http
 import Json.Decode exposing (..)
 import Json.Decode.Extra exposing (..)
@@ -34,9 +35,29 @@ update msg model =
     NewLang (Err _) ->
       (model, Cmd.none)
 
-toHtmlList : List ProgrammingLanguage -> Html msg
-toHtmlList strings = ul [] (List.map toLi (sort strings))
+header : Html msg -> Html msg
+header content = th [ scope "col" ] [ content ]
 
+toHtmlList : List ProgrammingLanguage -> Html msg
+toHtmlList strings =
+  table []
+    [
+      thead []
+        [
+          th [] [text "Product"],
+          th [] [text "Amount"]
+        ],
+      tbody [] (List.map row (sort strings))
+    ]
+
+row :  ProgrammingLanguage -> Html msg
+row x = tr []
+  [
+    td [] [text x.name],
+    td [] [text (toString x.count)]
+  ]
+
+sort : List ProgrammingLanguage -> List ProgrammingLanguage
 sort xs =
   xs
     |> filterYear 2015
@@ -59,6 +80,7 @@ toLi lang = li [] [ text (
 
 view : Model -> Html Msg
 view model = toHtmlList model.languageList
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model = Sub.none

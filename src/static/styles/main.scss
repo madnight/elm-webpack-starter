@@ -1,5 +1,17 @@
-$icon-font-path: '~bootstrap-sass/assets/fonts/bootstrap/';
-@import '~bootstrap-sass/assets/stylesheets/bootstrap/_mixins.scss';
-@import '~bootstrap-sass/assets/stylesheets/_bootstrap.scss';
+// $icon-font-path: '~bootstrap-sass/assets/fonts/bootstrap/';
+// @import '~bootstrap-sass/assets/stylesheets/_bootstrap.scss';
+// @import '~bootstrap-sass/assets/stylesheets/bootstrap/_mixins.scss';
 
 // can add Boostrap overrides, additional Sass/CSS below...
+
+table{
+    // border: 1px solid black;
+    // table-layout: cen;
+    width: 200px;
+    
+}
+
+th, td {
+    // border: 1px solid black;
+    width: 100px;
+}
