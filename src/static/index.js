@@ -6,4 +6,15 @@ require( '../../node_modules/bootstrap-sass/assets/javascripts/bootstrap.js' ); 
 // inject bundled Elm app into div#main
 require('./data/gh-star-event.json')
 var Elm = require( '../elm/Main' );
-Elm.Main.embed( document.getElementById( 'main' ) );
+var main = Elm.Main.embed( document.getElementById( 'main' ) );
+
+// Elm.fullscreen(Elm.Main, {reset:[]});   // take over the whole page
+// var div = document.getElementById('elm-main');
+// var main = Elm.embed(Elm.Main, div, {reset:[]});
+
+// You can send and receive values through
+// ports 'reset' and 'count'.
+// main.ports.reset.send([]);
+main.ports.check.subscribe(function(event) {
+    console.log(event);
+});
