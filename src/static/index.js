@@ -64,6 +64,6 @@ Highcharts.chart('container', options);
 
 main.ports.check.subscribe(function(event) {
         console.log(event);
-        options.title.text=event;
+        options.title.text=event.name;
         Highcharts.chart('container', options);
 });

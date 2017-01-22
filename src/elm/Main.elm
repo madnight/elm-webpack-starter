@@ -25,7 +25,7 @@ update msg model =
       (Model apiUrl, Cmd.none)
 
     Check ->
-      ( model, check "Hello World")
+      ( model, check (ProgrammingLanguage "Hello World" 1 2 3))
 
     NewLang (Err _) ->
       (model, Cmd.none)
@@ -54,7 +54,7 @@ toTable strings =
 
 -- port reset : Signal ()
 
-port check : String -> Cmd msg
+port check : ProgrammingLanguage -> Cmd msg
 
 row : ProgrammingLanguage -> Html msg
 row x = tr []
